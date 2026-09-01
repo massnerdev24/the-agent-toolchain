@@ -1,0 +1,20 @@
+---
+description: Git, commit, and PR conventions
+alwaysApply: true
+---
+
+# Git & PR conventions
+
+- Branch names: `agent/<ticket-id>-<slug>` for agent work,
+  `feat|fix|chore/<ticket-id>-<slug>` for human work.
+- Conventional Commits: `feat(scope): ...`, `fix(scope): ...`, etc.
+  Reference the ticket: `feat(auth): add session refresh (GH-123)`.
+- One logical change per PR. Stacked PRs over mega-PRs.
+- Every PR description must contain these sections:
+  ## What & why  (link the spec)
+  ## How it was tested  (paste actual test output)
+  ## Spec deviations  ("None" or an explanation)
+  ## Security findings  ("None" or details)
+- Never force-push shared branches. Never commit directly to main (sole
+  exception: bootstrap-project on a zero-commit repo, see AGENTS.md).
+  Non-ticket work uses `agent/repo-<slug>` (see AGENTS.md § Non-ticket work).

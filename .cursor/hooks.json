@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      { "command": "./.cursor/hooks-scripts/block-dangerous.sh" }
+    ],
+    "afterFileEdit": [
+      { "command": "./.cursor/hooks-scripts/format-changed.sh" }
+    ],
+    "stop": [
+      { "command": "./.cursor/hooks-scripts/verify-done.sh" }
+    ]
+  }
+}
