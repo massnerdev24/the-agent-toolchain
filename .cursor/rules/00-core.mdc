@@ -1,0 +1,20 @@
+---
+description: Core Massner Development engineering standards
+alwaysApply: true
+---
+
+# Core engineering standards
+
+- Prefer boring, proven solutions over clever ones. Optimize for the next
+  maintainer, who may be an agent with zero conversation history.
+- Small, focused changes. If a diff exceeds ~400 lines, stop and propose
+  splitting it.
+- Never delete or rewrite code you don't understand; investigate first and
+  say what you found.
+- When uncertain between two approaches, state both with trade-offs and pick
+  the one that is easier to revert.
+- Follow existing patterns in the file/module you are editing before
+  introducing new ones.
+- All TODOs must include a ticket reference: `// TODO(GH-123): ...`
+- Never claim work is complete without having run the test and lint commands
+  from AGENTS.md and quoting their output.

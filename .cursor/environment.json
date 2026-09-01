@@ -1,0 +1,5 @@
+{
+  "_comment": "Environment for Cursor Background Agents (remote VMs). The install command runs after the VM clones the repo; terminals start long-running processes agents may need. Verify current schema at cursor.com/docs -> background agents / environment. Keep these commands IDENTICAL to AGENTS.md and ci.yml.",
+  "install": "npm ci",
+  "terminals": []
+}

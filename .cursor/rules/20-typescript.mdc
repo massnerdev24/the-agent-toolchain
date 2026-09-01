@@ -1,0 +1,16 @@
+---
+description: TypeScript conventions
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# TypeScript conventions
+<!-- EXAMPLE of an Auto-Attached rule. Duplicate this pattern per stack
+     (30-python.mdc, 40-flutter.mdc, etc.) and delete what you don't use. -->
+
+- `strict: true` semantics assumed. No `any`; use `unknown` + narrowing.
+- Functional components + hooks only (no class components).
+- Named exports; default exports only for framework-required files.
+- Types co-located with usage; shared types in `src/types/`.
+- Prefer `type` over `interface` unless declaration merging is required.
+- Handle promise rejections explicitly — no floating promises.

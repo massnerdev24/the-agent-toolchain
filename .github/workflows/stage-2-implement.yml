@@ -1,0 +1,64 @@
+name: "Stage 2: Plan & implement on spec merge"
+# Trigger: a spec file lands on main (i.e. you merged the spec PR = approval).
+on:
+  push:
+    branches: [main]
+    paths: ["docs/specs/SPEC-*.md"]
+
+jobs:
+  plan-and-implement:
+    if: vars.MASSNER_STAGE2 == 'on'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Find the spec that changed
+        id: spec
+        run: |
+          FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- 'docs/specs/SPEC-*.md')
+          COUNT=$(printf '%s\n' "$FILES" | grep -c . || true)
+          if [ "$COUNT" -gt 1 ]; then
+            echo "::error::$COUNT spec files changed in one push; stage-2 plans one spec per merge. Merge one-line edits to re-trigger the others: $FILES"
+            exit 1
+          fi
+          echo "file=$FILES" >> "$GITHUB_OUTPUT"
+
+      - name: Require APPROVED status and no existing plan
+        id: gate
+        run: |
+          F="${{ steps.spec.outputs.file }}"
+          [ -z "$F" ] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          ID=$(basename "$F" | sed -E 's/^SPEC-(GH-[0-9]+)-.*/\1/')
+          if [ -f "docs/specs/PLAN-${ID}.md" ]; then
+            echo "::notice::PLAN-${ID}.md already exists — nothing to plan."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif grep -qE '^\- \*\*Status:\*\* *APPROVED' "$F"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::$F was merged without Status: APPROVED. Open a PR that sets the status line (or re-run write-spec) — planning will not start until it does."
+            exit 1
+          fi
+
+      - name: Install Cursor CLI
+        if: steps.gate.outputs.run == 'true'
+        run: curl https://cursor.com/install -fsS | bash && echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Plan tasks
+        if: steps.gate.outputs.run == 'true'
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          # Must NOT be GITHUB_TOKEN: PRs it opens never trigger CI, so the
+          # required checks can never pass. Fine-grained PAT of the massner-bot
+          # machine user (contents: write, pull-requests: write, issues: read).
+          GH_TOKEN: ${{ secrets.MASSNER_BOT_TOKEN }}
+        run: |
+          cursor-agent -p "Use the plan-tasks skill on ${{ steps.spec.outputs.file }}. Commit the PLAN file and open the PR. Do not approve, merge, or close any PR." --force --output-format text
+
+      # Option A (simplest to start): stop here — you review the plan, then
+      # manually kick each task to a Background Agent from the Cursor UI.
+      # Option B (later): add a second job triggered on PLAN merge that loops
+      # `cursor-agent -p "Use implement-task skill, next unchecked task in <plan>"`

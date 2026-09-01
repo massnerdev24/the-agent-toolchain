@@ -1,0 +1,22 @@
+---
+description: Security requirements — non-negotiable on every task
+alwaysApply: true
+---
+
+# Security requirements
+
+- NEVER hardcode secrets, API keys, tokens, or credentials. Use env vars and
+  add placeholder entries to `.env.example`.
+- Validate and sanitize ALL external input (request bodies, query params,
+  file uploads, webhook payloads) at the boundary.
+- Database access: parameterized queries / ORM only. String-built SQL is an
+  automatic task failure.
+- AuthN/AuthZ: every new endpoint or route must state its auth requirement
+  explicitly. "Public" must be a deliberate, commented decision.
+- Dependencies: before adding one, check maintenance status and known CVEs.
+  Prefer stdlib or existing deps.
+- Log nothing sensitive: no passwords, tokens, full card numbers, or PII
+  beyond what the feature strictly requires.
+- Errors returned to clients are generic; details go to server logs only.
+- If you discover an existing vulnerability while working, do not silently
+  fix or ignore it — report it in the PR under "Security findings".

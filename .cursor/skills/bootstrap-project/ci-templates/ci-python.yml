@@ -1,0 +1,22 @@
+name: CI
+on:
+  pull_request:
+  push: { branches: [main] }
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }          # match brief
+      - run: pip install uv && uv sync            # or: pip install -r requirements.txt
+      - run: uv run ruff check . && uv run ruff format --check .
+      - run: uv run mypy . || true                # tighten once types exist
+      - run: uv run pytest
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pip-audit && pip-audit
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
